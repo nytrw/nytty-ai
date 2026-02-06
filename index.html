@@ -4,42 +4,113 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nytty AI</title>
-  <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
-  <style>
+    <style>
+    /* Global reset and theme */
+    * {
+      margin: 0;
+      padding: 0;
+      background-color: #FBE8FF;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    a {
+      all: unset;
+      text-decoration: none;
+      color: #202124;
+    }
+
+    /* Top navigation */
+    .top-section {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .app-icon { width: 1.5rem; height: 1.5rem; }
+    .profile-pic { width: 2rem; height: 2rem; border-radius: 100%; }
+    .left-side { display: flex; gap: 1.5rem; }
+    .right-side { display: flex; gap: 1.5rem; justify-content: center; align-items: center; }
+
+    .left-side a, .right-side a { font-size: 0.8rem; }
+
+    /* Middle section */
+    .middle-section {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem 0;
+      gap: 1.2rem;
+    }
+
+    .search-logo-home { width: 20rem; }
+
     /* Chat bubbles container */
     #chat-bubbles {
+      flex: 1;
       max-width: 600px;
-      margin: 20px auto;
+      margin: 20px auto 0 auto;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      font-family: Arial, sans-serif;
-      padding-bottom: 80px; /* space for fixed input */
+      padding: 10px;
+      overflow-y: auto;
+      padding-bottom: 100px;
     }
+
     .bubble {
       padding: 10px 15px;
       border-radius: 20px;
       max-width: 80%;
       word-wrap: break-word;
-    }
-    .bubble.user {
-      background: #007bff;
-      color: #fff;
-      align-self: flex-end;
-    }
-    .bubble.bot {
-      background: #e5e5ea;
-      color: #000;
-      align-self: flex-start;
+      white-space: pre-wrap;
+      border: 1px solid #33083b; /* keeps bubbles outlined */
+      background: transparent; /* removed background color */
+      color: #8f34a1; /* default text color */
     }
 
-    /* Fixed input at the bottom */
+    .bubble.user {
+      align-self: flex-end;
+    }
+
+    .bubble.bot {
+      align-self: flex-start;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Code blocks inside chat */
+    pre {
+      background: #FBE8FF;
+      color: #8f34a1;
+      padding: 10px;
+      border-radius: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      border: 1px solid #9500af;
+    }
+
+    code {
+      font-family: monospace;
+      background-color: #FBE8FF;
+      color: #8f34a1;
+    }
+
+    pre::selection { background: #b9a6d8; color: #000; }
+
+    /* Fixed input at bottom */
     .fixed-input {
       position: fixed;
       bottom: 0;
       left: 0;
-      width: 95%;
+      width: 100%;
       background: #FBE8FF;
       padding: 10px 20px;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
@@ -48,6 +119,7 @@
       gap: 10px;
       z-index: 100;
     }
+
     .fixed-input input {
       flex: 1;
       padding: 10px 15px;
@@ -56,11 +128,25 @@
       outline: none;
     }
 
+    /* Bottom section (if needed) */
+    .bottom-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #FBE8FF;
+      border: 1px solid #8f34a1;
+      padding: 1rem 1.5rem;
+      margin-top: 15rem;
+    }
 
+    .bottom-section a {
+      margin: 0 1rem;
+      color: #70757a;
+    }
   </style>
 </head>
 <body>
-
+  <!-- Top navigation -->
   <div class="top-section">
     <div class="left-side">
       <a href="aboutus.html">About</a>
@@ -74,39 +160,32 @@
     </div>
   </div>
 
+  <!-- Middle section -->
   <div class="middle-section">
     <a href="index.html">
       <img class="search-logo-home" src="images/logo.png" />
     </a>
-
-    <!-- Chat bubbles appear here -->
     <div id="chat-bubbles"></div>
   </div>
 
-  <!-- Fixed input at the bottom -->
+  <!-- Fixed input -->
   <div class="fixed-input">
     <input type="text" id="chat-input" placeholder="Ask Nytty…" />
-    <img class="profile-pic" src="images/google_search_icon.svg"  onclick="sendMessage()" />
-  </div>
-    <div class="bottom-middle">
-      <a href="https://sustainability.google/carbon-free/#home">(fake) Carbon Neutral since 2007</a>
-    </div>
-    <div class="bottom-right">
-      <a href="https://policies.google.com/privacy?hl=en&fg=1">(fake) Privacy</a>
-      <a href="https://policies.google.com/terms?hl=en&fg=1">(fake) Terms</a>
-      <a href="https://www.google.com/settings">(fake) Settings</a>
-    </div>
+    <img class="profile-pic" src="images/google_search_icon.svg" onclick="sendMessage()" />
   </div>
 
+  <!-- Marked.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- JavaScript -->
   <script>
     const inputEl = document.getElementById('chat-input');
     const bubbles = document.getElementById('chat-bubbles');
 
-    // Add a chat bubble
     function addBubble(text, sender) {
       const div = document.createElement('div');
       div.className = 'bubble ' + sender;
-      div.textContent = text;
+      div.innerHTML = marked.parse(text);
       bubbles.appendChild(div);
       bubbles.scrollTop = bubbles.scrollHeight;
     }
@@ -126,11 +205,8 @@
           body: JSON.stringify({ prompt: query })
         });
         const data = await response.json();
-        if (data.response) {
-          addBubble(data.response, 'bot');
-        } else if (data.error) {
-          addBubble("Error: " + data.error, 'bot');
-        }
+        if (data.response) addBubble(data.response, 'bot');
+        else if (data.error) addBubble("Error: " + data.error, 'bot');
       } catch (err) {
         addBubble("Network error. Try again.", 'bot');
         console.error(err);
@@ -140,11 +216,9 @@
       }
     }
 
-    // Send on Enter key
     inputEl.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendMessage();
     });
   </script>
-
 </body>
 </html>
